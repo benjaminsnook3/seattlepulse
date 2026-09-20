@@ -8,6 +8,7 @@ import com.example.newworkspace.domain.model.SportsEvent
 import com.example.newworkspace.domain.model.TrafficIncident
 import com.example.newworkspace.domain.model.TransitAlert
 import com.example.newworkspace.domain.model.Weather
+import com.example.newworkspace.domain.model.SeattleDaySummary
 
 /**
  * Domain contract for Seattle Pulse data. Exposes domain models only; the UI
@@ -22,4 +23,5 @@ interface SeattleRepository {
     suspend fun getTrafficIncidents(): Outcome<List<TrafficIncident>>
     suspend fun getImpact(): Outcome<ImpactScore?>
     suspend fun getAlerts(): Outcome<List<CityAlert>>
+    suspend fun getDashboardSummary(): Outcome<SeattleDaySummary>
 }

@@ -11,6 +11,7 @@ import com.example.newworkspace.domain.model.TransitAlert
 import com.example.newworkspace.domain.model.TransitServiceType
 import com.example.newworkspace.domain.model.Venue
 import com.example.newworkspace.domain.model.Weather
+import com.example.newworkspace.domain.model.SeattleDaySummary
 import com.example.newworkspace.domain.repository.SeattleRepository
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -29,12 +30,17 @@ class GetSeattleDaySummaryUseCaseTest {
     private val now = Instant.parse("2026-09-14T18:00:00Z")
 
     private fun stubAllSuccess() {
-        coEvery { repository.getWeather() } returns Outcome.Success(sampleWeather())
-        coEvery { repository.getTransitAlerts() } returns Outcome.Success(listOf(sampleTransit()))
-        coEvery { repository.getSportsEvents() } returns Outcome.Success(listOf(sampleSports()))
-        coEvery { repository.getPublicEvents() } returns Outcome.Success(listOf(sampleEvent()))
-        coEvery { repository.getTrafficIncidents() } returns Outcome.Success(listOf(sampleTraffic()))
-        coEvery { repository.getImpact() } returns Outcome.Success(sampleImpact())
+        coEvery { repository.getDashboardSummary() } returns Outcome.Success(
+            SeattleDaySummary(
+                weather = sampleWeather(),
+                transitAlerts = listOf(sampleTransit()),
+                sportsEvents = listOf(sampleSports()),
+                publicEvents = listOf(sampleEvent()),
+                trafficIncidents = listOf(sampleTraffic()),
+                impact = sampleImpact(),
+                generatedAt = now
+            )
+        )
     }
 
     @Test
@@ -53,31 +59,25 @@ class GetSeattleDaySummaryUseCaseTest {
     }
 
     @Test
-    fun `one failing source does not destroy the others`() = runTest {
-        stubAllSuccess()
-        coEvery { repository.getSportsEvents() } returns Outcome.Failure(FailureReason.NETWORK, "down")
+    fun `dashboard failure reports all sections without crashing`() = runTest {
+        coEvery { repository.getDashboardSummary() } returns Outcome.Failure(FailureReason.NETWORK, "down")
 
         val result = useCase()
 
-        assertEquals(1, result.failures.size)
-        assertEquals(DataSection.SPORTS, result.failures.first().section)
-        // Other sections still populated.
-        assertEquals("w1", result.summary.weather?.id)
-        assertEquals(1, result.summary.transitAlerts.size)
-        assertEquals(1, result.summary.publicEvents.size)
-        // Failed section is empty, not null-crash.
+        assertEquals(DataSection.entries.size, result.failures.size)
+        assertTrue(result.failures.all { it.reason == FailureReason.NETWORK })
+        assertNull(result.summary.weather)
         assertTrue(result.summary.sportsEvents.isEmpty())
     }
 
     @Test
-    fun `weather failure leaves weather null and reports it`() = runTest {
-        stubAllSuccess()
-        coEvery { repository.getWeather() } returns Outcome.Failure(FailureReason.TIMEOUT, "slow")
+    fun `dashboard timeout leaves summary empty and reports it`() = runTest {
+        coEvery { repository.getDashboardSummary() } returns Outcome.Failure(FailureReason.TIMEOUT, "slow")
 
         val result = useCase()
 
         assertNull(result.summary.weather)
-        assertTrue(result.failures.any { it.section == DataSection.WEATHER })
+        assertTrue(result.failures.all { it.reason == FailureReason.TIMEOUT })
     }
 
     @Test

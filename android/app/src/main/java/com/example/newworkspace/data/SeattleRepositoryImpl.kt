@@ -9,6 +9,7 @@ import com.example.newworkspace.domain.model.SportsEvent
 import com.example.newworkspace.domain.model.TrafficIncident
 import com.example.newworkspace.domain.model.TransitAlert
 import com.example.newworkspace.domain.model.Weather
+import com.example.newworkspace.domain.model.SeattleDaySummary
 import com.example.newworkspace.domain.repository.SeattleRepository
 import com.example.newworkspace.network.api.SeattlePulseApi
 import com.example.newworkspace.network.mapper.toDomain
@@ -57,6 +58,23 @@ class SeattleRepositoryImpl @Inject constructor(
 
     override suspend fun getAlerts(): Outcome<List<CityAlert>> = call {
         api.getAlerts().map { it.toDomain() }
+    }
+
+    override suspend fun getDashboardSummary(): Outcome<SeattleDaySummary> = call {
+        api.getDashboard().let { dashboard ->
+            SeattleDaySummary(
+                weather = dashboard.weather.firstOrNull()?.toDomain(),
+                transitAlerts = dashboard.transit.map { it.toDomain() },
+                sportsEvents = dashboard.sports.map { it.toDomain() },
+                publicEvents = dashboard.events.map { it.toDomain() },
+                trafficIncidents = dashboard.traffic.map { it.toDomain() },
+                impact = dashboard.impact.toDomain(),
+                generatedAt = com.example.newworkspace.network.mapper.TimestampParser.parseOr(
+                    dashboard.generatedAt,
+                    java.time.Instant.EPOCH
+                )
+            )
+        }
     }
 
     private inline fun <T> call(block: () -> T): Outcome<T> = try {

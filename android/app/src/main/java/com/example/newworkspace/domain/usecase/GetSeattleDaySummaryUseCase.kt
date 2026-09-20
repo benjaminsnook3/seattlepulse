@@ -6,8 +6,6 @@ import com.example.newworkspace.domain.model.SeattleDaySummary
 import com.example.newworkspace.domain.repository.SeattleRepository
 import java.time.Instant
 import javax.inject.Inject
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 
 enum class DataSection {
     WEATHER,
@@ -37,52 +35,19 @@ class GetSeattleDaySummaryUseCase @Inject constructor(
     private val repository: SeattleRepository
 ) {
 
-    suspend operator fun invoke(): DaySummaryResult = coroutineScope {
-        val weatherDeferred = async { repository.getWeather() }
-        val transitDeferred = async { repository.getTransitAlerts() }
-        val sportsDeferred = async { repository.getSportsEvents() }
-        val eventsDeferred = async { repository.getPublicEvents() }
-        val trafficDeferred = async { repository.getTrafficIncidents() }
-        val impactDeferred = async { repository.getImpact() }
-
-        val failures = mutableListOf<SectionFailure>()
-
-        val weather = when (val o = weatherDeferred.await()) {
-            is Outcome.Success -> o.data
-            is Outcome.Failure -> { failures += SectionFailure(DataSection.WEATHER, o.reason); null }
-        }
-        val transit = when (val o = transitDeferred.await()) {
-            is Outcome.Success -> o.data
-            is Outcome.Failure -> { failures += SectionFailure(DataSection.TRANSIT, o.reason); emptyList() }
-        }
-        val sports = when (val o = sportsDeferred.await()) {
-            is Outcome.Success -> o.data
-            is Outcome.Failure -> { failures += SectionFailure(DataSection.SPORTS, o.reason); emptyList() }
-        }
-        val events = when (val o = eventsDeferred.await()) {
-            is Outcome.Success -> o.data
-            is Outcome.Failure -> { failures += SectionFailure(DataSection.EVENTS, o.reason); emptyList() }
-        }
-        val traffic = when (val o = trafficDeferred.await()) {
-            is Outcome.Success -> o.data
-            is Outcome.Failure -> { failures += SectionFailure(DataSection.TRAFFIC, o.reason); emptyList() }
-        }
-        val impact = when (val o = impactDeferred.await()) {
-            is Outcome.Success -> o.data
-            is Outcome.Failure -> { failures += SectionFailure(DataSection.IMPACT, o.reason); null }
-        }
-
-        DaySummaryResult(
+    suspend operator fun invoke(): DaySummaryResult = when (val result = repository.getDashboardSummary()) {
+        is Outcome.Success -> DaySummaryResult(result.data, emptyList())
+        is Outcome.Failure -> DaySummaryResult(
             summary = SeattleDaySummary(
-                weather = weather,
-                transitAlerts = transit,
-                sportsEvents = sports,
-                publicEvents = events,
-                trafficIncidents = traffic,
-                impact = impact,
+                weather = null,
+                transitAlerts = emptyList(),
+                sportsEvents = emptyList(),
+                publicEvents = emptyList(),
+                trafficIncidents = emptyList(),
+                impact = null,
                 generatedAt = Instant.now()
             ),
-            failures = failures
+            failures = DataSection.entries.map { SectionFailure(it, result.reason) }
         )
     }
 }
