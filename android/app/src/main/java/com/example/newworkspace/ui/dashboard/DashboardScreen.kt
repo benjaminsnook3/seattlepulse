@@ -520,7 +520,7 @@ private fun SeattleImpactCard(impact: ImpactScore) {
     }
     DashboardCard(title = "Seattle Impact") {
         Text(
-            text = "Current: $current (${impact.value})",
+            text = "$current impact · ${impact.value}/100",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(bottom = 8.dp)

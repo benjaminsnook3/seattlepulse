@@ -75,7 +75,10 @@ class SeattlePulseWidget : AppWidgetProvider() {
         summary: SeattleDaySummary
     ): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.seattle_pulse_widget)
-        views.setTextViewText(R.id.widget_impact, "${summary.impact?.level?.label() ?: "UPDATE"} ${summary.impact?.value ?: ""}")
+        views.setTextViewText(
+            R.id.widget_impact,
+            summary.impact?.let { "${it.level.label()} impact · ${it.value}/100" } ?: "Impact unavailable"
+        )
         views.setTextViewText(R.id.widget_transit, "Link: ${transitStatus(summary.transitAlerts, TransitServiceType.LINK)}")
         views.setTextViewText(R.id.widget_next_event, nextEventText(summary.sportsEvents))
 
