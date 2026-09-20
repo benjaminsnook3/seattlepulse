@@ -1,6 +1,7 @@
 package com.example.newworkspace.ui.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -53,6 +57,8 @@ private val timeFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("h:mm a", Locale.US).withZone(SEATTLE_ZONE)
 private val dayFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("EEE, MMM d", Locale.US).withZone(SEATTLE_ZONE)
+private val alertTimeFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("MMM d, h:mm a", Locale.US).withZone(SEATTLE_ZONE)
 
 @Composable
 fun DashboardScreen(
@@ -267,14 +273,6 @@ private fun TransitCard(transit: List<TransitAlert>) {
     val metroAlerts = transit.filter { it.serviceType == TransitServiceType.METRO }
 
     DashboardCard(title = "Transit") {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            StatusPill(text = "Link: ${statusLabel(linkAlerts)}")
-            StatusPill(text = "Metro: ${statusLabel(metroAlerts)}")
-        }
-
         if (transit.isEmpty()) {
             Text(
                 text = "No active alerts",
@@ -283,20 +281,104 @@ private fun TransitCard(transit: List<TransitAlert>) {
                 modifier = Modifier.padding(top = 12.dp)
             )
         } else {
+            TransitGroup(title = "Link", alerts = linkAlerts)
+            TransitGroup(title = "Metro", alerts = metroAlerts)
+        }
+    }
+}
+
+@Composable
+private fun TransitGroup(title: String, alerts: List<TransitAlert>) {
+    var expanded by rememberSaveable(title) { mutableStateOf(true) }
+
+    Column(modifier = Modifier.padding(top = 10.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = "Active alerts",
+                text = "$title · ${statusLabel(alerts)} (${alerts.size})",
                 style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(top = 12.dp, bottom = 6.dp)
+                fontWeight = FontWeight.Bold
             )
-            transit.take(5).forEach { alert ->
+            Text(
+                text = if (expanded) "Hide" else "Show",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        if (expanded) {
+            if (alerts.isEmpty()) {
                 Text(
-                    text = "• ${alert.serviceType.name}: ${alert.affectedLine} — ${alert.description}",
+                    text = "No active alerts",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
+            } else {
+                alerts.take(8).forEach { TransitAlertRow(it) }
             }
         }
+    }
+}
+
+@Composable
+private fun TransitAlertRow(alert: TransitAlert) {
+    var expanded by rememberSaveable(alert.id) { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+            .padding(vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = alert.affectedLine,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = if (expanded) "Hide" else "Details",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        Text(
+            text = transitTimeWindow(alert),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (expanded) {
+            Text(
+                text = "${alert.status}: ${alert.description}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
+        Divider(modifier = Modifier.padding(top = 8.dp))
+    }
+}
+
+private fun transitTimeWindow(alert: TransitAlert): String {
+    val start = alert.startTime?.let(alertTimeFormatter::format)
+    val end = alert.endTime?.let(alertTimeFormatter::format)
+    return when {
+        start != null && end != null -> "$start - $end"
+        start != null -> "Starting $start"
+        end != null -> "Until $end"
+        else -> "Ongoing"
     }
 }
 
