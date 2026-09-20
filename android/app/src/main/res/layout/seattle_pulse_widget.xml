@@ -4,14 +4,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#101114">
+    android:background="#002244">
 
     <TextView
         android:id="@+id/widget_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SEATTLE PULSE"
-        android:textColor="#C7FF3D"
+        android:textColor="#69BE28"
         android:textSize="14sp"
         android:textStyle="bold" />
 
@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="●"
-            android:textColor="#9B9DA5"
+            android:textColor="#A5ACAF"
             android:textSize="18sp" />
 
         <TextView
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:text="Impact unavailable"
-            android:textColor="#F5F5F2"
+            android:textColor="#E8F2FA"
             android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="Link: unavailable"
-        android:textColor="#C4C6CE"
+        android:textColor="#D0DFEA"
         android:textSize="14sp" />
 
     <TextView
@@ -58,6 +58,6 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="No upcoming Seattle event"
-        android:textColor="#C4C6CE"
+        android:textColor="#D0DFEA"
         android:textSize="14sp" />
 </LinearLayout>

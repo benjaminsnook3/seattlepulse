@@ -53,6 +53,10 @@ import com.example.newworkspace.domain.model.TransitServiceType
 import com.example.newworkspace.domain.model.Weather
 import com.example.newworkspace.R
 import com.example.newworkspace.domain.usecase.SectionFailure
+import com.example.newworkspace.ui.theme.SeahawksBlue
+import com.example.newworkspace.ui.theme.SeahawksNavy
+import com.example.newworkspace.ui.theme.SeahawksGreen
+import com.example.newworkspace.ui.theme.SeahawksSilver
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -76,7 +80,7 @@ fun DashboardScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val background = Brush.verticalGradient(
-        colors = listOf(Color(0xFF0D1B3A), Color(0xFF0B1A34), Color(0xFF081325))
+        colors = listOf(SeahawksBlue, SeahawksNavy, Color(0xFF001A35))
     )
 
     Box(
@@ -547,11 +551,11 @@ private fun SeattleImpactCard(impact: ImpactScore) {
 }
 
 private fun impactColor(level: Severity): Color = when (level) {
-    Severity.LOW -> Color(0xFF35C759)
+    Severity.LOW -> SeahawksGreen
     Severity.MODERATE -> Color(0xFFFFCC00)
     Severity.HIGH -> Color(0xFFFF9500)
     Severity.SEVERE -> Color(0xFFFF3B30)
-    Severity.UNKNOWN -> Color(0xFF9B9DA5)
+    Severity.UNKNOWN -> SeahawksSilver
 }
 
 @Composable
