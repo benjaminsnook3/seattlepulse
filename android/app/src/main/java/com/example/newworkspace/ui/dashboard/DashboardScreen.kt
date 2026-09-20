@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,6 +50,7 @@ import com.example.newworkspace.domain.model.SportsEvent
 import com.example.newworkspace.domain.model.TransitAlert
 import com.example.newworkspace.domain.model.TransitServiceType
 import com.example.newworkspace.domain.model.Weather
+import com.example.newworkspace.R
 import com.example.newworkspace.domain.usecase.SectionFailure
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -194,6 +198,17 @@ private fun DashboardContent(
         }
 
         item {
+            Image(
+                painter = painterResource(R.drawable.seattle_skyline),
+                contentDescription = "Seattle skyline",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(84.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        item {
             if (weather != null) WeatherCard(weather) else UnavailableCard("Weather")
         }
 
@@ -249,6 +264,12 @@ private fun WeatherCard(weather: Weather) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Image(
+                painter = painterResource(weatherIcon(weather.condition)),
+                contentDescription = weather.condition,
+                modifier = Modifier.height(54.dp),
+                contentScale = ContentScale.Fit
+            )
             Text(
                 text = "${weather.temperatureCelsius.toInt()} F",
                 style = MaterialTheme.typography.headlineMedium,
@@ -303,6 +324,14 @@ private fun TransitGroup(title: String, alerts: List<TransitAlert>) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Image(
+                painter = painterResource(
+                    if (title == "Metro") R.drawable.logo_metro else R.drawable.logo_link
+                ),
+                contentDescription = "$title logo",
+                modifier = Modifier.height(28.dp).padding(end = 8.dp),
+                contentScale = ContentScale.Fit
+            )
             Text(
                 text = "$title · ${statusLabel(alerts)} (${alerts.size})",
                 style = MaterialTheme.typography.titleSmall,
@@ -425,13 +454,42 @@ private fun compactTransitSummary(alert: TransitAlert): String? {
 @Composable
 private fun SportsCard(game: SportsEvent) {
     DashboardCard(title = "Next Game") {
-        InfoRow(label = "Matchup", value = "${game.team} vs ${game.opponent}")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            teamLogo(game.team)?.let { logo ->
+                Image(
+                    painter = painterResource(logo),
+                    contentDescription = "${game.team} logo",
+                    modifier = Modifier.height(42.dp).padding(end = 10.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+            Text(
+                text = "${game.team} vs ${game.opponent}",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
+        }
         InfoRow(
             label = "When",
             value = "${dayFormatter.format(game.startAt)} • ${timeFormatter.format(game.startAt)}"
         )
         InfoRow(label = "Venue", value = game.venue.name, showDivider = false)
     }
+}
+
+private fun weatherIcon(condition: String): Int {
+    val normalized = condition.lowercase(Locale.US)
+    return when {
+        normalized.contains("rain") || normalized.contains("shower") -> R.drawable.weather_rain
+        normalized.contains("cloud") || normalized.contains("fog") -> R.drawable.weather_cloudy_rain
+        else -> R.drawable.weather_sun
+    }
+}
+
+private fun teamLogo(team: String): Int? = when (team.lowercase(Locale.US)) {
+    "seahawks" -> R.drawable.logo_seahawks
+    "sounders" -> R.drawable.logo_sounders
+    else -> null
 }
 
 @Composable
