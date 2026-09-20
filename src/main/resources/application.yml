@@ -38,6 +38,7 @@ seattle:
     latitude: 47.6062
     longitude: -122.3321
     cache-ttl-seconds: 900
+    refresh-minutes: 60
   transit:
     soundtransit-alerts-url: https://www.soundtransit.org/ride-with-us/service-alerts
     metro-alerts-url: https://s3.amazonaws.com/kcm-alerts-realtime-prod/alerts.pb

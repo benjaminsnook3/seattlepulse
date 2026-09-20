@@ -41,7 +41,8 @@ class IngestionService(
     private val sportsRepository: SportsRepository,
     private val eventRepository: EventRepository,
     private val trafficRepository: TrafficRepository,
-    private val alertService: AlertService
+    private val alertService: AlertService,
+    @Value("\${seattle.weather.refresh-minutes:60}") private val weatherRefreshMinutes: Long = 60
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -62,6 +63,13 @@ class IngestionService(
     @Transactional
     fun ingestWeather() {
         try {
+            val latest = weatherRepository.findTop20ByOrderByObservedAtDesc().firstOrNull()
+            val refreshAfter = Instant.now().minusSeconds(weatherRefreshMinutes * 60)
+            if (latest != null && latest.observedAt.isAfter(refreshAfter)) {
+                logger.info("Weather ingestion skipped; latest record is less than one hour old")
+                return
+            }
+
             weatherCacheService.getLatestWeather(forceRefresh = true)?.let { weather ->
                 weatherRepository.save(persistenceMapper.toEntity(weather))
                 logger.info("Weather ingestion updated {}", weather.id)

@@ -34,6 +34,7 @@ class IngestionServiceWeatherTest {
         val weather = sampleWeather()
         val entity = sampleEntity(weather)
 
+        every { weatherRepository.findTop20ByOrderByObservedAtDesc() } returns emptyList()
         every { weatherCacheService.getLatestWeather(true) } returns weather
         every { persistenceMapper.toEntity(weather) } returns entity
         every { weatherRepository.save(entity) } returns entity
@@ -50,6 +51,7 @@ class IngestionServiceWeatherTest {
         val persistenceMapper = mockk<PersistenceMapper>()
         val ingestionService = buildService(weatherCacheService, weatherRepository, persistenceMapper)
 
+        every { weatherRepository.findTop20ByOrderByObservedAtDesc() } returns emptyList()
         every { weatherCacheService.getLatestWeather(true) } throws RuntimeException("network down")
 
         assertDoesNotThrow { ingestionService.ingestWeather() }

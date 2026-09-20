@@ -57,17 +57,22 @@ class SeattlePulseController(
 
     @GetMapping("/weather")
     fun weather(): List<WeatherResponse> {
+        val persistedWeather = try {
+            weatherRepository.findTop20ByOrderByObservedAtDesc()
+                .map { persistenceMapper.toDomain(it).toResponse() }
+        } catch (_: Exception) {
+            emptyList()
+        }
+        if (persistedWeather.isNotEmpty()) {
+            return persistedWeather
+        }
+
         val cachedWeather = weatherCacheService.getLatestWeather()
         if (cachedWeather != null) {
             return listOf(cachedWeather.toResponse())
         }
 
-        return try {
-            weatherRepository.findTop20ByOrderByObservedAtDesc()
-                .map { persistenceMapper.toDomain(it).toResponse() }
-        } catch (ex: Exception) {
-            emptyList()
-        }
+        return emptyList()
     }
 
     @GetMapping("/transit")
