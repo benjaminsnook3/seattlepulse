@@ -51,6 +51,9 @@ import com.example.newworkspace.domain.usecase.SectionFailure
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+import android.net.Uri
 
 private val SEATTLE_ZONE: ZoneId = ZoneId.of("America/Los_Angeles")
 private val timeFormatter: DateTimeFormatter =
@@ -330,11 +333,19 @@ private fun TransitGroup(title: String, alerts: List<TransitAlert>) {
 @Composable
 private fun TransitAlertRow(alert: TransitAlert) {
     var expanded by rememberSaveable(alert.id) { mutableStateOf(false) }
+    val context = LocalContext.current
+    val detailsUrl = alert.source.endpoint
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { expanded = !expanded }
+            .clickable {
+                if (!detailsUrl.isNullOrBlank()) {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(detailsUrl)))
+                } else {
+                    expanded = !expanded
+                }
+            }
             .padding(vertical = 8.dp)
     ) {
         Row(
@@ -349,17 +360,17 @@ private fun TransitAlertRow(alert: TransitAlert) {
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = if (expanded) "Hide" else "Details",
+                text = if (detailsUrl.isNullOrBlank()) "Details" else "Tap for details",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
         }
         Text(
-            text = transitTimeWindow(alert),
+            text = compactTransitSummary(alert) ?: transitTimeWindow(alert),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        if (expanded) {
+        if (expanded && detailsUrl.isNullOrBlank()) {
             Text(
                 text = "${alert.status}: ${alert.description}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -393,6 +404,24 @@ private fun statusLabel(alerts: List<TransitAlert>): String {
     }
 }
 
+private fun compactTransitSummary(alert: TransitAlert): String? {
+    val tripPattern = Regex(
+        "(?i)to\\s+(.+?)\\s+scheduled at\\s+([0-9]{1,2}:[0-9]{2}\\s*(?:a\\.m\\.|p\\.m\\.|am|pm))\\s+from\\s+(.+?)(?=\\r?\\n|$)"
+    )
+    val trips = tripPattern.findAll(alert.description).mapNotNull { match ->
+        val destination = match.groupValues[1].trim()
+        val time = match.groupValues[2].trim().replace("a.m.", "AM").replace("p.m.", "PM")
+        val origin = match.groupValues[3].trim()
+        Triple(destination, time, origin)
+    }.toList()
+
+    if (trips.size < 2) return null
+    val first = trips.first()
+    val last = trips.last()
+    if (first.first != last.first || first.third != last.third) return null
+
+    return "Affected trips to ${first.first} from ${first.third} ${first.second} - ${last.second}"
+}
 @Composable
 private fun SportsCard(game: SportsEvent) {
     DashboardCard(title = "Next Game") {
