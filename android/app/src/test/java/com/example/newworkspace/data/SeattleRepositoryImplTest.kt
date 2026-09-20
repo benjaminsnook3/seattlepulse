@@ -87,4 +87,16 @@ class SeattleRepositoryImplTest {
         assertTrue(result is Outcome.Failure)
         assertEquals(FailureReason.SERVER, (result as Outcome.Failure).reason)
     }
+
+    @Test
+    fun `provider quota error becomes recoverable network failure`() = runTest {
+        val httpException = mockk<HttpException>()
+        io.mockk.every { httpException.code() } returns 429
+        coEvery { api.getWeather() } throws httpException
+
+        val result = repository.getWeather()
+
+        assertTrue(result is Outcome.Failure)
+        assertEquals(FailureReason.NETWORK, (result as Outcome.Failure).reason)
+    }
 }

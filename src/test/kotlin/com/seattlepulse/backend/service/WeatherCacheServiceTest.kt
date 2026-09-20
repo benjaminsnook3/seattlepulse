@@ -44,6 +44,19 @@ class WeatherCacheServiceTest {
     }
 
     @Test
+    fun `returns cached weather when forced refresh hits provider quota`() {
+        val provider = MutableWeatherProvider(successPayload())
+        val service = WeatherCacheService(provider, normalizationService, cacheTtlSeconds = 900)
+
+        val initial = service.getLatestWeather()
+        provider.fail = true
+
+        val cached = service.getLatestWeather(forceRefresh = true)
+
+        assertEquals(initial?.id, cached?.id)
+    }
+
+    @Test
     fun `returns null when provider fails and no cache exists`() {
         val provider = MutableWeatherProvider(successPayload())
         provider.fail = true

@@ -153,6 +153,7 @@ Base URL notes:
 - Android emulator to local backend: http://10.0.2.2:8080/
 - Physical device to LAN backend: http://<your-machine-ip>:8080/
 - Release builds require a real backend URL: run `android\gradlew.bat assembleRelease -PseattlePulseBaseUrl=https://your-api-host/` or set `SEATTLE_PULSE_BASE_URL` before building.
+- Android clean checkouts require an Android SDK path via `ANDROID_HOME` or an untracked `android/local.properties` file containing `sdk.dir=...`.
 
 Example Retrofit contract:
 

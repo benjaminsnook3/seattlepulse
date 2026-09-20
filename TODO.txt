@@ -1,4 +1,4 @@
-Current status: Phase 15 local personalization is implemented. Next: Phase 16 automated testing.
+Current status: Phase 16 automated testing is implemented. Next: Phase 17 real-world testing.
 
 Phase 8 — Add Seattle sports
 
@@ -228,7 +228,7 @@ morning/evening summaries
 
 Now someone who doesn't care about the Storm doesn't have to see Storm notifications.
 
-Phase 16 — Automated testing
+Phase 16 — Automated testing (implemented)
 
 This should be a dedicated AI task.
 
@@ -257,7 +257,7 @@ Fix failures.
 
 Do not declare the project complete until the build and tests pass.
 
-Phase 17 — Real-world testing
+Phase 17 — Real-world testing (next)
 
 Then have the AI create a checklist:
 
