@@ -267,6 +267,13 @@ Edit src/main/resources/application.yml:
 
 ## Run
 
+For Render Web Service deployment:
+
+- Build command: `./gradlew clean bootJar -x test`
+- Start command: `java -jar build/libs/seattle-pulse-backend-0.0.1-SNAPSHOT.jar`
+- Health check path: `/actuator/health`
+- Set `TICKETMASTER_API_KEY` as an environment variable when Ticketmaster events are enabled.
+
 If Gradle wrapper is available:
 
 ```bash
