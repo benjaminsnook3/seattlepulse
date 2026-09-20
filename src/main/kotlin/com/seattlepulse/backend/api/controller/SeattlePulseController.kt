@@ -306,6 +306,7 @@ class SeattlePulseController(
         message = message,
         severity = severity,
         createdAt = createdAt,
-        expiresAt = expiresAt
+        expiresAt = expiresAt,
+        detailsUrl = detailsUrl
     )
 }

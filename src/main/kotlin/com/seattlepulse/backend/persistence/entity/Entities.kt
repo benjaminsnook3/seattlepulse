@@ -151,7 +151,8 @@ data class AlertEntity(
     @Enumerated(EnumType.STRING)
     val severity: Severity,
     val createdAt: Instant,
-    val expiresAt: Instant?
+    val expiresAt: Instant?,
+    val detailsUrl: String? = null
 )
 
 @Entity

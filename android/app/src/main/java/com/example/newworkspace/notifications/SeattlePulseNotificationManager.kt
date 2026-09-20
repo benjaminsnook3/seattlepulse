@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.example.newworkspace.MainActivity
 import com.example.newworkspace.R
@@ -32,12 +33,21 @@ class SeattlePulseNotificationManager(private val context: Context) {
     }
 
     fun build(alert: CityAlert): Notification {
+        val targetIntent = if (
+            alert.category.equals("TRANSIT", ignoreCase = true) &&
+            !alert.detailsUrl.isNullOrBlank()
+        ) {
+            Intent(Intent.ACTION_VIEW, Uri.parse(alert.detailsUrl))
+        } else {
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        }
+
         val contentIntent = PendingIntent.getActivity(
             context,
             alert.id.hashCode(),
-            Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            },
+            targetIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 

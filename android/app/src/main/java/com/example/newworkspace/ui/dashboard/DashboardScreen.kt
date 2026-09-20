@@ -192,7 +192,7 @@ private fun DashboardContent(
 
         item {
             val nextGame = sports.firstOrNull { it.inSeattle }
-            if (nextGame != null) SportsCard(nextGame) else UnavailableCard("Sports", "No upcoming Seattle games")
+            if (nextGame != null) SportsCard(nextGame) else UnavailableCard("Sports", "On the road!")
         }
 
         item { EventsCard(events) }

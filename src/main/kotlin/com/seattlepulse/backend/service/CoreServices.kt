@@ -261,7 +261,8 @@ class AlertService(
                         message = alert.description,
                         severity = alert.severity,
                         createdAt = now,
-                        expiresAt = now.plus(90, ChronoUnit.MINUTES)
+                        expiresAt = now.plus(90, ChronoUnit.MINUTES),
+                        detailsUrl = alert.sourceUrl
                     ),
                     NotificationPriority.CRITICAL,
                     "transit-${alert.serviceType}-${alert.affectedLine}"

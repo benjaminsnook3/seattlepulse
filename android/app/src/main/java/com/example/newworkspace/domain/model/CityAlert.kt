@@ -13,5 +13,6 @@ data class CityAlert(
     val message: String,
     val severity: Severity,
     val createdAt: Instant,
-    val expiresAt: Instant?
+    val expiresAt: Instant?,
+    val detailsUrl: String? = null
 )

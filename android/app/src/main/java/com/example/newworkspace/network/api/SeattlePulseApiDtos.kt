@@ -154,5 +154,6 @@ data class AlertResponseDto(
     val message: String,
     val severity: String,
     val createdAt: String,
-    val expiresAt: String? = null
+    val expiresAt: String? = null,
+    val detailsUrl: String? = null
 )

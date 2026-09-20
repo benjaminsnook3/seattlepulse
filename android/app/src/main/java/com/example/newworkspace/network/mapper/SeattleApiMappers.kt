@@ -140,5 +140,6 @@ fun AlertResponseDto.toDomain(): CityAlert = CityAlert(
     message = message,
     severity = Severity.fromApi(severity),
     createdAt = TimestampParser.parseOr(createdAt, Instant.EPOCH),
-    expiresAt = TimestampParser.parseOrNull(expiresAt)
+    expiresAt = TimestampParser.parseOrNull(expiresAt),
+    detailsUrl = detailsUrl
 )

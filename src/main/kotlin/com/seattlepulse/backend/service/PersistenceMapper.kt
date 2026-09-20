@@ -119,7 +119,8 @@ class PersistenceMapper {
         message = record.message,
         severity = record.severity,
         createdAt = record.createdAt,
-        expiresAt = record.expiresAt
+        expiresAt = record.expiresAt,
+        detailsUrl = record.detailsUrl
     )
 
     fun toDomain(entity: WeatherEntity): WeatherRecord = WeatherRecord(
@@ -215,6 +216,7 @@ class PersistenceMapper {
         message = entity.message,
         severity = entity.severity,
         createdAt = entity.createdAt,
-        expiresAt = entity.expiresAt
+        expiresAt = entity.expiresAt,
+        detailsUrl = entity.detailsUrl
     )
 }
