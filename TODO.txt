@@ -1,4 +1,4 @@
-Current status: Phase 14 home-screen widget is implemented. Next: Phase 15 personalization.
+Current status: Phase 15 local personalization is implemented. Next: Phase 16 automated testing.
 
 Phase 8 — Add Seattle sports
 
@@ -211,7 +211,7 @@ Then:
 
 Tap widget → open dashboard.
 
-Phase 15 — Personalization
+Phase 15 — Personalization (implemented)
 
 Once the basic app works:
 

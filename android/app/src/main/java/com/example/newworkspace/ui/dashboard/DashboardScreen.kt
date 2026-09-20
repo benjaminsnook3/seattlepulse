@@ -54,7 +54,10 @@ private val dayFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("EEE, MMM d", Locale.US).withZone(SEATTLE_ZONE)
 
 @Composable
-fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
+fun DashboardScreen(
+    onSettings: () -> Unit = {},
+    viewModel: DashboardViewModel = hiltViewModel()
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val background = Brush.verticalGradient(
@@ -69,21 +72,26 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Seattle Pulse",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Live city status",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column {
+                        Text(
+                            text = "Seattle Pulse",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Live city status",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    OutlinedButton(onClick = onSettings) { Text("Settings") }
                 }
             }
         ) { innerPadding ->
