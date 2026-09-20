@@ -1,4 +1,4 @@
-Current status: Phase 16 automated testing is implemented. Next: Phase 17 real-world testing.
+Current status: Phase 18 installable debug APK is complete; Play Store configuration is deferred.
 
 Phase 8 — Add Seattle sports
 
@@ -281,7 +281,7 @@ rather than merely:
 
 “Here are some events.”
 
-Phase 18 — Production
+Phase 18 — Production (partial: installable APK complete; Play Store deferred)
 
 Finally:
 

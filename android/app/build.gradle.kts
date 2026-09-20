@@ -15,6 +15,10 @@ android {
         .orElse(providers.environmentVariable("SEATTLE_PULSE_BASE_URL"))
         .orNull
 
+    val configuredDebugBaseUrl = providers.gradleProperty("seattlePulseDebugBaseUrl")
+        .orElse(providers.environmentVariable("SEATTLE_PULSE_DEBUG_BASE_URL"))
+        .orNull
+
     val releaseTaskRequested = gradle.startParameter.taskNames.any {
         it.contains("release", ignoreCase = true)
     }
@@ -29,6 +33,10 @@ android {
     } else {
         "https://invalid.local/"
     }
+
+    val debugBaseUrl = configuredDebugBaseUrl?.let { url ->
+        if (!url.endsWith("/")) "$url/" else url
+    } ?: "http://10.0.2.2:8080/"
 
     defaultConfig {
         applicationId = "com.example.newworkspace"
@@ -45,7 +53,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "SEATTLE_PULSE_BASE_URL", "\"http://10.0.2.2:8080/\"")
+            buildConfigField("String", "SEATTLE_PULSE_BASE_URL", "\"$debugBaseUrl\"")
         }
         release {
             isMinifyEnabled = false
