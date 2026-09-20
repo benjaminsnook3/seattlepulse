@@ -131,7 +131,6 @@ fun DashboardScreen(
 
                 is DashboardUiState.Success -> DashboardContent(
                     innerPadding = innerPadding,
-                    weather = current.summary.weather,
                     transit = current.summary.transitAlerts,
                     sports = current.summary.sportsEvents,
                     events = current.summary.publicEvents,
@@ -142,7 +141,6 @@ fun DashboardScreen(
 
                 is DashboardUiState.PartialSuccess -> DashboardContent(
                     innerPadding = innerPadding,
-                    weather = current.summary.weather,
                     transit = current.summary.transitAlerts,
                     sports = current.summary.sportsEvents,
                     events = current.summary.publicEvents,
@@ -173,7 +171,6 @@ private fun CenteredContent(
 @Composable
 private fun DashboardContent(
     innerPadding: PaddingValues,
-    weather: Weather?,
     transit: List<TransitAlert>,
     sports: List<SportsEvent>,
     events: List<PublicEvent>,
@@ -208,14 +205,10 @@ private fun DashboardContent(
             )
         }
 
-        item {
-            if (weather != null) WeatherCard(weather) else UnavailableCard("Weather")
-        }
-
         item { TransitCard(transit) }
 
         item {
-            val nextGame = sports.firstOrNull { it.inSeattle }
+            val nextGame = sports.filter { it.inSeattle }.minByOrNull { it.startAt }
             if (nextGame != null) SportsCard(nextGame) else UnavailableCard("Sports", "On the road!")
         }
 

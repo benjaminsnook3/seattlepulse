@@ -17,6 +17,7 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 import kotlinx.serialization.SerializationException
+import kotlinx.coroutines.delay
 import retrofit2.HttpException
 
 /**
@@ -60,7 +61,16 @@ class SeattleRepositoryImpl @Inject constructor(
         api.getAlerts().map { it.toDomain() }
     }
 
-    override suspend fun getDashboardSummary(): Outcome<SeattleDaySummary> = call {
+    override suspend fun getDashboardSummary(): Outcome<SeattleDaySummary> {
+        var result = loadDashboardSummary()
+        if (result is Outcome.Failure && result.reason != FailureReason.PARSE) {
+            delay(1500)
+            result = loadDashboardSummary()
+        }
+        return result
+    }
+
+    private suspend fun loadDashboardSummary(): Outcome<SeattleDaySummary> = call {
         api.getDashboard().let { dashboard ->
             SeattleDaySummary(
                 weather = dashboard.weather.firstOrNull()?.toDomain(),

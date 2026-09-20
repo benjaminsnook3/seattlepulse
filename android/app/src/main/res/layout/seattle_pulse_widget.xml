@@ -26,15 +26,6 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/widget_weather"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Weather unavailable"
-        android:textColor="#C4C6CE"
-        android:textSize="14sp" />
-
-    <TextView
         android:id="@+id/widget_transit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -9,13 +9,12 @@ import android.content.Intent
 import android.widget.RemoteViews
 import com.example.newworkspace.MainActivity
 import com.example.newworkspace.R
-import com.example.newworkspace.domain.model.ImpactScore
 import com.example.newworkspace.domain.model.Outcome
 import com.example.newworkspace.domain.model.Severity
 import com.example.newworkspace.domain.model.SportsEvent
 import com.example.newworkspace.domain.model.TransitAlert
 import com.example.newworkspace.domain.model.TransitServiceType
-import com.example.newworkspace.domain.model.Weather
+import com.example.newworkspace.domain.model.SeattleDaySummary
 import com.example.newworkspace.domain.repository.SeattleRepository
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -43,12 +42,13 @@ class SeattlePulseWidget : AppWidgetProvider() {
         ).repository()
 
         CoroutineScope(Dispatchers.IO).launch {
-            val weather = repository.getWeather().successOrNull()
-            val transit = repository.getTransitAlerts().successOrNull().orEmpty()
-            val sports = repository.getSportsEvents().successOrNull().orEmpty()
-            val impact = repository.getImpact().successOrNull()
-            val views = buildViews(context, weather, transit, sports, impact)
-            appWidgetIds.forEach { manager.updateAppWidget(it, views) }
+            when (val result = repository.getDashboardSummary()) {
+                is Outcome.Success -> {
+                    val views = buildViews(context, result.data)
+                    appWidgetIds.forEach { manager.updateAppWidget(it, views) }
+                }
+                is Outcome.Failure -> Unit
+            }
             pendingResult.finish()
         }
     }
@@ -72,19 +72,12 @@ class SeattlePulseWidget : AppWidgetProvider() {
 
     private fun buildViews(
         context: Context,
-        weather: Weather?,
-        transit: List<TransitAlert>,
-        sports: List<SportsEvent>,
-        impact: ImpactScore?
+        summary: SeattleDaySummary
     ): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.seattle_pulse_widget)
-        views.setTextViewText(R.id.widget_impact, impact?.let { "${it.level.label()} ${it.value}" } ?: "Impact unavailable")
-        views.setTextViewText(
-            R.id.widget_weather,
-            weather?.let { "${it.temperatureCelsius.toInt()}°C · ${it.condition}" } ?: "Weather unavailable"
-        )
-        views.setTextViewText(R.id.widget_transit, "Link: ${transitStatus(transit, TransitServiceType.LINK)}")
-        views.setTextViewText(R.id.widget_next_event, nextEventText(sports))
+        views.setTextViewText(R.id.widget_impact, "${summary.impact?.level?.label() ?: "UPDATE"} ${summary.impact?.value ?: ""}")
+        views.setTextViewText(R.id.widget_transit, "Link: ${transitStatus(summary.transitAlerts, TransitServiceType.LINK)}")
+        views.setTextViewText(R.id.widget_next_event, nextEventText(summary.sportsEvents))
 
         val openApp = PendingIntent.getActivity(
             context,
@@ -107,7 +100,7 @@ class SeattlePulseWidget : AppWidgetProvider() {
     }
 
     private fun nextEventText(sports: List<SportsEvent>): String {
-        val event = sports.filter { it.inSeattle }.minByOrNull { it.startAt } ?: return "No upcoming Seattle event"
+        val event = sports.filter { it.inSeattle }.minByOrNull { it.startAt } ?: return "On the road!"
         return "${event.team} · ${event.venue.name}"
     }
 
