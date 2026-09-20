@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
+import android.graphics.Color
 import com.example.newworkspace.MainActivity
 import com.example.newworkspace.R
 import com.example.newworkspace.domain.model.Outcome
@@ -77,7 +78,11 @@ class SeattlePulseWidget : AppWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.seattle_pulse_widget)
         views.setTextViewText(
             R.id.widget_impact,
-            summary.impact?.let { "${it.level.label()} impact · ${it.value}/100" } ?: "Impact unavailable"
+            summary.impact?.let { "${it.level.label()} impact" } ?: "Impact unavailable"
+        )
+        views.setTextColor(
+            R.id.widget_impact_dot,
+            summary.impact?.let { impactColor(it.level) } ?: Color.GRAY
         )
         views.setTextViewText(R.id.widget_transit, "Link: ${transitStatus(summary.transitAlerts, TransitServiceType.LINK)}")
         views.setTextViewText(R.id.widget_next_event, nextEventText(summary.sportsEvents))
@@ -124,6 +129,14 @@ class SeattlePulseWidget : AppWidgetProvider() {
         Severity.HIGH -> "HIGH"
         Severity.SEVERE -> "SEVERE"
         Severity.UNKNOWN -> "UPDATE"
+    }
+
+    private fun impactColor(level: Severity): Int = when (level) {
+        Severity.LOW -> Color.rgb(53, 199, 89)
+        Severity.MODERATE -> Color.rgb(255, 204, 0)
+        Severity.HIGH -> Color.rgb(255, 149, 0)
+        Severity.SEVERE -> Color.rgb(255, 59, 48)
+        Severity.UNKNOWN -> Color.GRAY
     }
 
     companion object {

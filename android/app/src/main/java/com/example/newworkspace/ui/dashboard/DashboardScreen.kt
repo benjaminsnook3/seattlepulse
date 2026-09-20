@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -514,17 +515,26 @@ private fun EventsCard(events: List<PublicEvent>) {
 
 @Composable
 private fun SeattleImpactCard(impact: ImpactScore) {
-    val levels = listOf("Low", "Moderate", "High", "Severe")
     val current = impact.level.name.lowercase().replaceFirstChar {
         if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString()
     }
     DashboardCard(title = "Seattle Impact") {
-        Text(
-            text = "$current impact · ${impact.value}/100",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 8.dp)
-        )
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(impactColor(impact.level), CircleShape)
+            )
+            Text(
+                text = "$current impact",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
         if (impact.factors.isNotEmpty()) {
             Text(
                 text = impact.factors.joinToString(" + "),
@@ -533,27 +543,15 @@ private fun SeattleImpactCard(impact: ImpactScore) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            levels.forEach { level ->
-                val selected = level == current
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text(level) },
-                    modifier = Modifier.height(34.dp),
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                        labelColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledContainerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                        disabledLabelColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-            }
-        }
     }
+}
+
+private fun impactColor(level: Severity): Color = when (level) {
+    Severity.LOW -> Color(0xFF35C759)
+    Severity.MODERATE -> Color(0xFFFFCC00)
+    Severity.HIGH -> Color(0xFFFF9500)
+    Severity.SEVERE -> Color(0xFFFF3B30)
+    Severity.UNKNOWN -> Color(0xFF9B9DA5)
 }
 
 @Composable
