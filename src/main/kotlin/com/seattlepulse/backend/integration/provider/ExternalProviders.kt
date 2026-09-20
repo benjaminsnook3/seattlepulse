@@ -10,6 +10,7 @@ import com.seattlepulse.backend.integration.dto.ExternalWeatherDto
 import com.seattlepulse.backend.integration.dto.ExternalWeatherForecastDto
 import org.jsoup.Jsoup
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import java.time.Instant
@@ -19,9 +20,12 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
+import java.net.URI
 import java.util.Locale
 
 interface WeatherProvider {
+    val providerName: String get() = "Weather"
+    val endpoint: String get() = "/"
     fun fetch(): ExternalWeatherDto?
 }
 
@@ -45,10 +49,14 @@ interface TrafficProvider {
 }
 
 @Component
+@Order(1)
 class OpenMeteoWeatherProvider(
     @Value("\${seattle.weather.latitude}") private val latitude: Double,
     @Value("\${seattle.weather.longitude}") private val longitude: Double
 ) : WeatherProvider {
+
+    override val providerName = "OpenMeteo"
+    override val endpoint = "/v1/forecast"
 
     private val restClient = RestClient.builder().baseUrl("https://api.open-meteo.com").build()
 
@@ -123,6 +131,72 @@ class OpenMeteoWeatherProvider(
             LocalDateTime.parse(raw).toInstant(ZoneOffset.UTC)
         }
     }
+}
+
+@Component
+@Order(2)
+class NationalWeatherServiceProvider(
+    @Value("\${seattle.weather.latitude}") private val latitude: Double,
+    @Value("\${seattle.weather.longitude}") private val longitude: Double
+) : WeatherProvider {
+
+    override val providerName = "NationalWeatherService"
+    override val endpoint = "https://api.weather.gov/points/$latitude,$longitude/forecast/hourly"
+
+    private val restClient = RestClient.builder()
+        .baseUrl("https://api.weather.gov")
+        .defaultHeader("User-Agent", "SeattlePulse/1.0 (weather fallback)")
+        .build()
+
+    override fun fetch(): ExternalWeatherDto? {
+        val points = restClient.get()
+            .uri("/points/{latitude},{longitude}", latitude, longitude)
+            .retrieve()
+            .body(NwsPointsResponse::class.java)
+            ?: return null
+        val forecastUrl = points.properties?.forecastHourly ?: return null
+        val forecast = restClient.get()
+            .uri(URI.create(forecastUrl))
+            .retrieve()
+            .body(NwsHourlyResponse::class.java)
+            ?.properties
+            ?.periods
+            .orEmpty()
+        val current = forecast.firstOrNull() ?: return null
+
+        val forecastPoints = forecast.take(12).map { period ->
+            ExternalWeatherForecastDto(
+                time = Instant.parse(period.startTime),
+                temperatureCelsius = toCelsius(period.temperature, period.temperatureUnit),
+                rainProbabilityPercent = period.probabilityOfPrecipitation?.value ?: 0,
+                condition = period.shortForecast
+            )
+        }
+        val rain = forecastPoints.firstOrNull()?.rainProbabilityPercent ?: 0
+        return ExternalWeatherDto(
+            id = "nws-weather-${Instant.now().truncatedTo(ChronoUnit.HOURS)}",
+            observedAt = Instant.parse(current.startTime),
+            temperatureCelsius = toCelsius(current.temperature, current.temperatureUnit),
+            windSpeedKmh = parseWindSpeedKmh(current.windSpeed),
+            rainProbabilityPercent = rain,
+            condition = current.shortForecast,
+            forecastSummary = current.detailedForecast,
+            forecast = forecastPoints,
+            description = "Weather from the National Weather Service"
+        )
+    }
+
+    private fun toCelsius(value: Double, unit: String): Double =
+        if (unit.equals("F", ignoreCase = true)) (value - 32.0) * 5.0 / 9.0 else value
+
+    private fun parseWindSpeedKmh(value: String): Double =
+        Regex("(\\d+(?:\\.\\d+)?)")
+            .find(value)
+            ?.groupValues
+            ?.get(1)
+            ?.toDoubleOrNull()
+            ?.times(1.60934)
+            ?: 0.0
 }
 
 @Component
@@ -336,4 +410,40 @@ private data class OpenMeteoHourly(
     @JsonProperty("temperature_2m") val temperature: List<Double>?,
     @JsonProperty("precipitation_probability") val precipitationProbability: List<Int>?,
     @JsonProperty("weather_code") val weatherCode: List<Int>?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class NwsPointsResponse(
+    val properties: NwsPointsProperties?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class NwsPointsProperties(
+    val forecastHourly: String?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class NwsHourlyResponse(
+    val properties: NwsHourlyProperties?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class NwsHourlyProperties(
+    val periods: List<NwsPeriod> = emptyList()
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class NwsPeriod(
+    val startTime: String,
+    val temperature: Double,
+    val temperatureUnit: String,
+    val probabilityOfPrecipitation: NwsValue?,
+    val shortForecast: String,
+    val detailedForecast: String,
+    val windSpeed: String
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class NwsValue(
+    val value: Int?
 )

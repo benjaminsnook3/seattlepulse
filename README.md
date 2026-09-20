@@ -219,6 +219,7 @@ Group or badge alerts in the UI by `serviceType` to distinguish Link, Metro, and
 ## Weather Reliability
 
 - Live weather provider: Open-Meteo current + hourly forecast.
+- Weather fallback provider: National Weather Service hourly forecast API, used when Open-Meteo is unavailable or rate-limited.
 - Internal normalization: provider response mapped into WeatherRecord with forecast summary, high/low, and hourly forecast points.
 - Cache: in-memory weather cache with configurable TTL via seattle.weather.cache-ttl-seconds.
 - Failure handling: provider errors are caught and fallback to cache is used; ingestion logs failures safely without crashing the app.

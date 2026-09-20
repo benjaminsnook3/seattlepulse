@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 @Service
 class WeatherCacheService(
-    private val weatherProvider: WeatherProvider,
+    private val weatherProviders: List<WeatherProvider>,
     private val normalizationService: NormalizationService,
     @Value("\${seattle.weather.cache-ttl-seconds:900}") private val cacheTtlSeconds: Long
 ) {
@@ -25,8 +25,15 @@ class WeatherCacheService(
         }
 
         return try {
-            val dto = weatherProvider.fetch() ?: throw IllegalStateException("Weather provider returned null response")
-            val normalized = normalizationService.toWeather(dto, "OpenMeteo", "/v1/forecast")
+            val normalized = weatherProviders.asSequence().mapNotNull { provider ->
+                runCatching {
+                    provider.fetch()?.let {
+                        normalizationService.toWeather(it, provider.providerName, provider.endpoint)
+                    }
+                }.onFailure { ex ->
+                    logger.warn("Weather provider {} failed; trying fallback", provider.providerName, ex)
+                }.getOrNull()
+            }.firstOrNull() ?: throw IllegalStateException("All weather providers failed")
             cache.set(CachedWeather(normalized, Instant.now()))
             normalized
         } catch (ex: Exception) {
