@@ -1,12 +1,14 @@
 package com.example.newworkspace.notifications
 
 import android.content.Context
+import android.content.Intent
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.newworkspace.domain.model.CityAlert
 import com.example.newworkspace.domain.model.Outcome
 import com.example.newworkspace.domain.repository.SeattleRepository
+import com.example.newworkspace.widget.SeattlePulseWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Instant
@@ -37,6 +39,10 @@ class AlertPollingWorker @AssistedInject constructor(
                 }
                 fresh.forEach { notificationManager.show(it) }
                 seenAlertsStore.pruneBefore(now.minusSeconds(SEEN_RETENTION_SECONDS))
+                applicationContext.sendBroadcast(
+                    Intent(SeattlePulseWidget.ACTION_REFRESH)
+                        .setPackage(applicationContext.packageName)
+                )
                 Result.success()
             }
         }

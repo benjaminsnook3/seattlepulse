@@ -1,4 +1,4 @@
-Current status: Phase 13 lock-screen notifications are implemented. Next: Phase 14 home-screen widget.
+Current status: Phase 14 home-screen widget is implemented. Next: Phase 15 personalization.
 
 Phase 8 — Add Seattle sports
 
@@ -193,7 +193,7 @@ weather
 
 This is much safer architecturally than trying to make your app literally become the lock screen.
 
-Phase 14 — Build the widget (next)
+Phase 14 — Build the widget (implemented)
 
 The widget might look like:
 
