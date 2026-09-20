@@ -1,0 +1,303 @@
+Phase 8 — Add Seattle sports
+
+
+Create a sports data service.
+
+Support:
+
+Mariners
+Seahawks
+Kraken
+Sounders
+Storm
+
+Retrieve upcoming games.
+
+Store:
+
+team
+opponent
+start time
+venue
+home/away
+event status
+
+Identify whether the event occurs within Seattle.
+
+Then make the dashboard show:
+
+Tonight
+
+⚾ Mariners — 6:40 PM
+🏟️ T-Mobile Park
+
+Phase 9 — Add concerts and major events
+
+This needs slightly more thought because "big concert" isn't a clean API concept.
+
+
+Create an event ingestion system.
+
+Support events from approved event/venue sources.
+
+Track major Seattle venues such as:
+
+Climate Pledge Arena
+Lumen Field
+T-Mobile Park
+Seattle Center
+Paramount Theatre
+other major venues
+
+Store event date, time, venue, location, category, attendance estimate when available, and source.
+
+Create an event importance score.
+
+Then:
+
+Define rules for determining whether an event is "major."
+
+Examples:
+
+major professional sporting event
+large concert
+major festival
+parade
+large public gathering
+event expected to significantly affect transit
+
+This prevents the app from becoming an endless list of random events.
+
+Phase 10 — Build the Seattle Impact Engine
+
+This is the secret sauce.
+
+
+Create an ImpactEngine.
+
+It should analyze:
+
+transit disruptions
+sporting events
+concerts
+public events
+weather
+traffic incidents
+
+Calculate an overall Seattle transportation impact score from 0–100.
+
+Categorize it:
+
+0–24 = LOW
+
+25–49 = MODERATE
+
+50–74 = HIGH
+
+75–100 = SEVERE
+
+Explain which factors contributed to the score.
+
+So instead of:
+
+Mariners game
+
+you can tell the user:
+
+HIGH IMPACT
+
+Mariners game + Link delays + downtown concert
+
+That's much more useful.
+
+Phase 11 — Make it location-aware
+
+Then:
+
+Add location awareness.
+
+Ask the user for permission to access approximate location.
+
+Allow the user to manually select a neighborhood/area if they don't provide location.
+
+Determine which events and transit disruptions are relevant to the user's area.
+
+Do not require location permission for the core application.
+
+Now you could eventually have:
+
+Your area
+
+🚈 Link: Normal
+🏟️ Event nearby: Mariners
+🚦 Traffic: Heavy
+🌧️ Rain: 70%
+
+Phase 12 — Notifications
+
+
+Implement Android push notifications.
+
+Notifications should be sent for meaningful changes, including:
+
+major Link disruption
+major Metro disruption
+game starting soon
+large concert starting soon
+major event affecting transportation
+significant weather change
+significant impact-score change
+
+Prevent notification spam.
+
+Implement notification priority rules and cooldowns.
+
+Then create examples like:
+
+🚈 Seattle Pulse
+
+Link 1 Line disruption
+Expect delays between Northgate and downtown.
+
+or:
+
+🏟️ Seattle Pulse
+
+Mariners game starts in 90 minutes.
+Expect heavier transit around T-Mobile Park.
+
+Phase 13 — Lock screen
+
+
+Implement Android notifications optimized for lock-screen visibility.
+
+The most important information should fit into the notification title and first lines.
+
+Example:
+
+Seattle Pulse — HIGH IMPACT
+
+Link delays + Mariners game
+Downtown transit may be busy 5–9 PM.
+
+Do not attempt to replace the Android lock screen.
+
+Also implement an Android home-screen widget showing:
+
+current impact level
+transit status
+next major event
+weather
+
+This is much safer architecturally than trying to make your app literally become the lock screen.
+
+Phase 14 — Build the widget
+
+The widget might look like:
+
+SEATTLE PULSE
+
+🟠 MODERATE
+
+🌧️ 58°F / Rain
+
+🚈 Link: Normal
+
+⚾ Mariners — 6:40 PM
+
+Then:
+
+Tap widget → open dashboard.
+
+Phase 15 — Personalization
+
+Once the basic app works:
+
+Add user preferences.
+
+Allow users to select:
+
+favorite sports teams
+transit systems
+neighborhoods
+notification types
+notification sensitivity
+morning/evening summaries
+
+Now someone who doesn't care about the Storm doesn't have to see Storm notifications.
+
+Phase 16 — Automated testing
+
+This should be a dedicated AI task.
+
+Tell it:
+
+Audit the entire application.
+
+Create tests for:
+
+API failures
+missing data
+expired alerts
+duplicate events
+timezone conversion
+daylight saving time
+notification deduplication
+impact calculations
+offline behavior
+database failures
+
+Build the application from a clean checkout.
+
+Run all tests.
+
+Fix failures.
+
+Do not declare the project complete until the build and tests pass.
+
+Phase 17 — Real-world testing
+
+Then have the AI create a checklist:
+
+Test during:
+
+Mariners game
+Seahawks game
+Kraken game
+Climate Pledge concert
+Link disruption
+heavy rain
+normal weekday
+weekend
+major Seattle event
+
+You want to see whether the app actually answers:
+
+“Should I leave now?”
+
+rather than merely:
+
+“Here are some events.”
+
+Phase 18 — Production
+
+Finally:
+
+Prepare Seattle Pulse for production.
+
+Configure:
+
+production API
+secure API keys
+database backups
+logging
+crash reporting
+notification infrastructure
+privacy policy
+Android permissions
+release signing
+Play Store configuration
+
+Remove all development credentials and mock data.
+
+Perform a final security audit.

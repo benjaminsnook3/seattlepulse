@@ -1,0 +1,13 @@
+.gradle/
+build/
+out/
+.tools/
+.idea/
+
+# Local secrets / overrides (never commit)
+config/
+.env
+.env.*
+*.iml
+*.log
+/data/

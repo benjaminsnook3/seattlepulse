@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: seattle-pulse-backend
+  datasource:
+    url: jdbc:h2:file:./data/seattlepulse;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+seattle:
+  ingestion:
+    fixed-delay-ms: 300000
+    initial-delay-ms: 45000
+  cleanup:
+    fixed-delay-ms: 600000
+  notifications:
+    enabled: true
+  weather:
+    latitude: 47.6062
+    longitude: -122.3321
+    cache-ttl-seconds: 900
+  transit:
+    soundtransit-alerts-url: https://www.soundtransit.org/ride-with-us/service-alerts
+    metro-alerts-url: https://s3.amazonaws.com/kcm-alerts-realtime-prod/alerts.pb
+  sports:
+    espn-base-url: https://site.web.api.espn.com/apis/site/v2
+    lookahead-days: 14
+  events:
+    # Set TICKETMASTER_API_KEY in the environment (or config/application-local.yml).
+    # Never commit a real key.
+    ticketmaster-api-key: ${TICKETMASTER_API_KEY:}
+    lookahead-days: 14
