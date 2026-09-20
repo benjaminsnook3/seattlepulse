@@ -1,0 +1,9 @@
+.git
+.gradle
+build
+android/.gradle
+android/app/build
+.tools
+config
+*.log
+local.properties
