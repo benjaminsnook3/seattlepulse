@@ -1,3 +1,5 @@
+Current status: Phase 13 lock-screen notifications are implemented. Next: Phase 14 home-screen widget.
+
 Phase 8 — Add Seattle sports
 
 
@@ -166,7 +168,7 @@ or:
 Mariners game starts in 90 minutes.
 Expect heavier transit around T-Mobile Park.
 
-Phase 13 — Lock screen
+Phase 13 — Lock screen (implemented)
 
 
 Implement Android notifications optimized for lock-screen visibility.
@@ -191,7 +193,7 @@ weather
 
 This is much safer architecturally than trying to make your app literally become the lock screen.
 
-Phase 14 — Build the widget
+Phase 14 — Build the widget (next)
 
 The widget might look like:
 
